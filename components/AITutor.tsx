@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Terminal, Cpu } from 'lucide-react';
+import { Send, Terminal, Cpu, Image as ImageIcon } from 'lucide-react';
 import { ChatMessage } from '../types';
-import { sendMessageToTutor } from '../services/geminiService';
+import { sendMessageToTutor, generateConceptSlide } from '../services/geminiService';
 
 interface AITutorProps {
   initialPrompt?: string;
+  currentContext?: string; // To give context to the visualizer
 }
 
-const AITutor: React.FC<AITutorProps> = ({ initialPrompt }) => {
+const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'init',
@@ -18,6 +19,7 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt }) => {
   ]);
   const [input, setInput] = useState(initialPrompt || '');
   const [loading, setLoading] = useState(false);
+  const [visualizing, setVisualizing] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -57,6 +59,48 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt }) => {
     setLoading(false);
   };
 
+  const handleVisualize = async () => {
+    if (visualizing || loading) return;
+    
+    // Determine concept to visualize based on input or current context
+    const concept = input.trim() || currentContext || "Rails Request Cycle";
+    
+    setVisualizing(true);
+    // Add a placeholder message
+    const placeholderId = Date.now().toString();
+    setMessages(prev => [...prev, {
+        id: placeholderId,
+        role: 'model',
+        text: `Initializing NanoBanana Visual Synthesis for: "${concept}"...`,
+        timestamp: Date.now()
+    }]);
+
+    const base64Image = await generateConceptSlide(concept);
+
+    setMessages(prev => {
+        // Replace placeholder or add new message
+        return prev.map(msg => {
+            if (msg.id === placeholderId) {
+                if (base64Image) {
+                    return {
+                        ...msg,
+                        text: `Architectural Diagram generated for: ${concept}`,
+                        image: base64Image
+                    };
+                } else {
+                    return {
+                        ...msg,
+                        text: `Visualization failed. Please check API configuration or try a simpler concept.`
+                    };
+                }
+            }
+            return msg;
+        });
+    });
+    setVisualizing(false);
+    setInput('');
+  };
+
   return (
     <div className="flex flex-col h-full bg-slate-900 border-l border-slate-700">
       {/* Header */}
@@ -65,7 +109,10 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt }) => {
             <Cpu className="text-rails-red w-5 h-5" />
             <h2 className="font-mono font-bold text-slate-100">AI Architect Console</h2>
         </div>
-        <div className="text-xs text-slate-500 font-mono">Gemini-3-Flash</div>
+        <div className="flex items-center gap-2">
+             {visualizing && <span className="text-[10px] text-emerald-400 animate-pulse font-mono">RENDERING</span>}
+             <div className="text-xs text-slate-500 font-mono">Gemini-3-Flash</div>
+        </div>
       </div>
 
       {/* Messages */}
@@ -73,7 +120,7 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt }) => {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
           >
             <div
               className={`max-w-[85%] rounded-lg p-3 text-sm font-mono whitespace-pre-wrap ${
@@ -84,6 +131,12 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt }) => {
             >
               {msg.text}
             </div>
+            
+            {msg.image && (
+                <div className="mt-2 max-w-[85%] rounded-lg overflow-hidden border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                    <img src={msg.image} alt="Generated Visualization" className="w-full h-auto" />
+                </div>
+            )}
           </div>
         ))}
         {loading && (
@@ -107,16 +160,26 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt }) => {
                 handleSend();
               }
             }}
-            placeholder="Ask about Rails patterns or generate code..."
+            placeholder="Ask about Rails patterns or visualize concepts..."
             className="w-full bg-slate-950 text-slate-200 border border-slate-700 rounded-md pl-4 pr-12 py-3 text-sm font-mono focus:outline-none focus:border-rails-red focus:ring-1 focus:ring-rails-red resize-none h-20"
           />
-          <button
-            onClick={handleSend}
-            disabled={loading}
-            className="absolute right-2 bottom-2 p-2 text-slate-400 hover:text-white disabled:opacity-50"
-          >
-            <Send size={16} />
-          </button>
+          <div className="absolute right-2 bottom-2 flex gap-1">
+            <button
+                onClick={handleVisualize}
+                disabled={loading || visualizing}
+                title="Generate Visual Slide (NanoBanana)"
+                className="p-2 text-slate-400 hover:text-emerald-400 disabled:opacity-50 transition-colors"
+            >
+                <ImageIcon size={16} />
+            </button>
+            <button
+                onClick={handleSend}
+                disabled={loading}
+                className="p-2 text-slate-400 hover:text-white disabled:opacity-50 transition-colors"
+            >
+                <Send size={16} />
+            </button>
+          </div>
         </div>
         <div className="mt-2 text-[10px] text-slate-600 font-mono flex gap-2">
             <Terminal size={12} />

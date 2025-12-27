@@ -1,4 +1,4 @@
-import { Difficulty, LessonCategory, Module } from './types';
+import { Difficulty, LessonCategory, Module, BlueprintProject, DeltaComparison } from './types';
 
 export const SYSTEM_INSTRUCTION = `You are a Senior Ruby on Rails Architect and Teacher. 
 Your goal is to teach modern Rails 7+ development with a focus on:
@@ -15,6 +15,92 @@ When providing code:
 - Assume Rails 7.1+ or 8.0 context.
 
 Be concise. Direct. No fluff.`;
+
+export const BLUEPRINTS: BlueprintProject[] = [
+  {
+    id: 'bp1',
+    name: 'Discourse',
+    description: 'The standard for modern community forums.',
+    tags: ['Forum', 'EmberJS', 'Complex'],
+    githubUrl: 'https://github.com/discourse/discourse',
+    architecturalHighlight: 'Masterclass in Serializers and heavy background job processing.'
+  },
+  {
+    id: 'bp2',
+    name: 'Mastodon',
+    description: 'Decentralized social networking server.',
+    tags: ['Social', 'ActivityPub', 'Streaming'],
+    githubUrl: 'https://github.com/mastodon/mastodon',
+    architecturalHighlight: 'Excellent example of Policy Objects (Pundit) and Service Objects in action.'
+  },
+  {
+    id: 'bp3',
+    name: 'Feedbin',
+    description: 'RSS Reader with a focus on design and speed.',
+    tags: ['SaaS', 'Stripe', 'ViewComponents'],
+    githubUrl: 'https://github.com/feedbin/feedbin',
+    architecturalHighlight: 'Practical use of Russian Doll Caching and intricate PostgreSQL features.'
+  },
+  {
+    id: 'bp4',
+    name: 'Solidus',
+    description: 'Open source eCommerce framework.',
+    tags: ['eCommerce', 'Spree', 'Modular'],
+    githubUrl: 'https://github.com/solidusio/solidus',
+    architecturalHighlight: 'Learn how to build a modular engine-based architecture.'
+  }
+];
+
+export const DELTAS: DeltaComparison[] = [
+  {
+    id: 'd1',
+    topic: 'Background Jobs',
+    rails7: {
+      title: 'Rails 7 (Standard)',
+      code: `# Gemfile
+gem 'sidekiq'
+
+# config/sidekiq.yml
+:concurrency: 5
+:queues:
+  - default
+  - mailers`,
+      description: 'Relies on Redis. Requires managing a separate service/container.'
+    },
+    rails8: {
+      title: 'Rails 8 (Solid Queue)',
+      code: `# Gemfile
+gem 'solid_queue'
+
+# config/queue.yml
+default:
+  polling_interval: 1
+  dispatchers:
+    - pool: 5`,
+      description: 'DB-backed queuing. No Redis required. Simplifies deployment (Kamal friendly).'
+    },
+    architecturalVerdict: 'Use Solid Queue for 90% of apps. It reduces infrastructure complexity (no Redis) which is the biggest failure point for small teams.'
+  },
+  {
+    id: 'd2',
+    topic: 'Asset Pipeline',
+    rails7: {
+      title: 'Sprockets / Importmaps',
+      code: `// config/importmap.rb
+pin "application"
+pin "@hotwired/turbo-rails", to: "turbo.min.js"`,
+      description: 'Importmaps allow ES modules without a bundler. Sprockets handles CSS.'
+    },
+    rails8: {
+      title: 'Propshaft',
+      code: `# config/initializers/assets.rb
+Rails.application.config.assets.paths << Rails.root.join("node_modules")
+# Propshaft assumes modern browsers and HTTP/2`,
+      description: 'Propshaft is simpler and faster. It just copies assets. No complex transpilation pipeline by default.'
+    },
+    architecturalVerdict: 'Propshaft reduces complexity by relying on modern browser standards and HTTP/2, removing the need for complex transpilation pipelines.'
+  }
+];
 
 export const CURRICULUM: Module[] = [
   {
@@ -105,11 +191,45 @@ If a controller action has more than 5 lines of code, you probably need a Servic
   },
   {
     id: 'm3',
+    title: 'Rails 8: The Frontier',
+    description: 'Understanding the shift to "No-PaaS" and Solid infrastructure.',
+    lessons: [
+      {
+        id: 'l3-1',
+        title: 'Version Delta: 7 vs 8',
+        category: LessonCategory.VERSION_DELTA,
+        difficulty: Difficulty.ADVANCED,
+        description: 'Interactive comparison of the architectural shifts in Rails 8.',
+        content: 'This module loads the Interactive Delta Interface.',
+        aiPromptTemplate: "Explain the difference between Sidekiq and Solid Queue in terms of deployment complexity.",
+        architecturalNote: "Rails 8 aims to make you independent of cloud providers. Solid Queue and Solid Cache use your DB, removing the need for Redis."
+      }
+    ]
+  },
+  {
+    id: 'm4',
+    title: 'The Architect\'s Library',
+    description: 'Curated Open Source blueprints to study.',
+    lessons: [
+      {
+        id: 'l4-1',
+        title: 'Blueprint Repository',
+        category: LessonCategory.BLUEPRINTS,
+        difficulty: Difficulty.INTERMEDIATE,
+        description: 'Analysis of production-grade Open Source Rails apps.',
+        content: 'This module loads the Blueprint Repository.',
+        aiPromptTemplate: "Analyze the 'app/services' folder of the Mastodon repo and explain the key patterns used.",
+        architecturalNote: "Do not invent patterns. Steal them from proven codebases like Discourse and Mastodon."
+      }
+    ]
+  },
+  {
+    id: 'm5',
     title: 'Deployment & Constraints',
     description: 'Production readiness, Docker, and CI/CD.',
     lessons: [
       {
-        id: 'l3-1',
+        id: 'l5-1',
         title: 'The Dockerfile',
         category: LessonCategory.DEPLOYMENT,
         difficulty: Difficulty.ADVANCED,

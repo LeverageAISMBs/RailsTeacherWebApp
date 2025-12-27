@@ -10,7 +10,9 @@ export enum LessonCategory {
   PATTERNS = 'Patterns',
   DEPLOYMENT = 'Deployment',
   AI_WORKFLOW = 'AI Workflow',
-  ECOSYSTEM = 'Ecosystem'
+  ECOSYSTEM = 'Ecosystem',
+  VERSION_DELTA = 'Version Delta',
+  BLUEPRINTS = 'Blueprints'
 }
 
 export interface Lesson {
@@ -35,6 +37,7 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   text: string;
+  image?: string; // Base64 image data
   timestamp: number;
   isError?: boolean;
 }
@@ -51,4 +54,29 @@ export enum RailsComponentType {
   CONTROLLER = 'Controller',
   ROUTE = 'Route',
   DATABASE = 'Database'
+}
+
+export interface BlueprintProject {
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
+  githubUrl: string;
+  architecturalHighlight: string;
+}
+
+export interface DeltaComparison {
+  id: string;
+  topic: string;
+  rails7: {
+    title: string;
+    code: string;
+    description: string;
+  };
+  rails8: {
+    title: string;
+    code: string;
+    description: string;
+  };
+  architecturalVerdict: string;
 }

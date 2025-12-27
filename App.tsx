@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import AITutor from './components/AITutor';
 import Visualizer from './components/Visualizer';
+import VersionDelta from './components/VersionDelta';
+import BlueprintLibrary from './components/BlueprintLibrary';
 import { CURRICULUM } from './constants';
-import { Lesson, RailsComponentType } from './types';
+import { Lesson, RailsComponentType, LessonCategory } from './types';
 import { Layers, Lightbulb, Activity, ArrowRight } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -22,6 +24,49 @@ const App: React.FC = () => {
     if (lower.includes('view') || lower.includes('html')) return RailsComponentType.VIEW;
     if (lower.includes('route')) return RailsComponentType.ROUTE;
     return undefined;
+  };
+
+  // Render content based on category
+  const renderMainContent = () => {
+    if (currentLesson.category === LessonCategory.VERSION_DELTA) {
+        return <VersionDelta />;
+    }
+    if (currentLesson.category === LessonCategory.BLUEPRINTS) {
+        return <BlueprintLibrary />;
+    }
+
+    // Default Text Content
+    return (
+        <>
+            <div className="mb-8">
+                <Visualizer activeStage={getVisualizerStage(currentLesson.title)} />
+            </div>
+
+            <div className="prose prose-invert prose-slate max-w-none prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800">
+                {currentLesson.content.split('\n').map((line, i) => {
+                    if (line.startsWith('# ')) return <h2 key={i} className="text-2xl font-bold text-white mt-6 mb-4">{line.replace('# ', '')}</h2>
+                    if (line.startsWith('## ')) return <h3 key={i} className="text-xl font-semibold text-slate-200 mt-5 mb-3">{line.replace('## ', '')}</h3>
+                    if (line.startsWith('### ')) return <h4 key={i} className="text-lg font-medium text-slate-300 mt-4 mb-2">{line.replace('### ', '')}</h4>
+                    if (line.startsWith('* ')) return <li key={i} className="ml-4 list-disc text-slate-400">{line.replace('* ', '')}</li>
+                    if (line.trim().startsWith('1.')) return <li key={i} className="ml-4 list-decimal text-slate-400">{line.substring(2)}</li>
+                    return <p key={i} className="mb-4 text-slate-300 leading-relaxed">{line}</p>
+                })}
+            </div>
+
+            {/* Architectural Note */}
+            <div className="mt-8 p-6 bg-amber-950/20 border border-amber-900/50 rounded-lg">
+                <div className="flex items-start gap-3">
+                    <Lightbulb className="text-amber-500 flex-shrink-0 mt-1" size={20} />
+                    <div>
+                        <h4 className="text-sm font-bold text-amber-500 uppercase tracking-wider mb-2">Senior Architect Note</h4>
+                        <p className="text-sm text-amber-200/80 leading-relaxed font-mono">
+                            {currentLesson.architecturalNote}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
   };
 
   return (
@@ -63,39 +108,15 @@ const App: React.FC = () => {
                     <p className="text-lg text-slate-400 leading-relaxed font-light">{currentLesson.description}</p>
                 </div>
 
-                <div className="mb-8">
-                    <Visualizer activeStage={getVisualizerStage(currentLesson.title)} />
-                </div>
-
-                <div className="prose prose-invert prose-slate max-w-none prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800">
-                    {/* Rendering "Markdown" simply here for demo purposes - normally would use a markdown library */}
-                    {currentLesson.content.split('\n').map((line, i) => {
-                        if (line.startsWith('# ')) return <h2 key={i} className="text-2xl font-bold text-white mt-6 mb-4">{line.replace('# ', '')}</h2>
-                        if (line.startsWith('## ')) return <h3 key={i} className="text-xl font-semibold text-slate-200 mt-5 mb-3">{line.replace('## ', '')}</h3>
-                        if (line.startsWith('### ')) return <h4 key={i} className="text-lg font-medium text-slate-300 mt-4 mb-2">{line.replace('### ', '')}</h4>
-                        if (line.startsWith('* ')) return <li key={i} className="ml-4 list-disc text-slate-400">{line.replace('* ', '')}</li>
-                        if (line.trim().startsWith('1.')) return <li key={i} className="ml-4 list-decimal text-slate-400">{line.substring(2)}</li>
-                        return <p key={i} className="mb-4 text-slate-300 leading-relaxed">{line}</p>
-                    })}
-                </div>
-
-                {/* Architectural Note */}
-                <div className="mt-8 p-6 bg-amber-950/20 border border-amber-900/50 rounded-lg">
-                    <div className="flex items-start gap-3">
-                        <Lightbulb className="text-amber-500 flex-shrink-0 mt-1" size={20} />
-                        <div>
-                            <h4 className="text-sm font-bold text-amber-500 uppercase tracking-wider mb-2">Senior Architect Note</h4>
-                            <p className="text-sm text-amber-200/80 leading-relaxed font-mono">
-                                {currentLesson.architecturalNote}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                {renderMainContent()}
             </div>
 
             {/* Split Pane - AI Console */}
-            <div className="w-[450px] flex-shrink-0 h-full">
-                <AITutor initialPrompt={currentLesson.aiPromptTemplate} />
+            <div className="w-[450px] flex-shrink-0 h-full border-l border-slate-800">
+                <AITutor 
+                    initialPrompt={currentLesson.aiPromptTemplate} 
+                    currentContext={currentLesson.title + ": " + currentLesson.architecturalNote}
+                />
             </div>
         </div>
       </main>
