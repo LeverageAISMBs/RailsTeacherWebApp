@@ -276,6 +276,16 @@ Rails 7.1+ ships with a default Dockerfile. Use it.
         content: 'Loading CLI Architect Interface...',
         aiPromptTemplate: 'N/A',
         architecturalNote: 'Memorizing syntax is a waste of mental RAM. Use tools to generate the syntax so you can focus on the data model.'
+      },
+      {
+        id: 'l6-2',
+        title: 'The Snippet Forge',
+        category: LessonCategory.SNIPPET_FORGE,
+        difficulty: Difficulty.ADVANCED,
+        description: 'Generate complex, strictly typed Ruby code from natural language descriptions.',
+        content: 'Loading Snippet Forge Interface...',
+        aiPromptTemplate: 'N/A',
+        architecturalNote: 'Use AI to scaffold the complex logic of Service Objects and Concerns, then manually refine the business rules.'
       }
     ]
   }

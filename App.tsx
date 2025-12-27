@@ -5,6 +5,7 @@ import Visualizer from './components/Visualizer';
 import VersionDelta from './components/VersionDelta';
 import BlueprintLibrary from './components/BlueprintLibrary';
 import CLIArchitect from './components/CLIArchitect';
+import SnippetForge from './components/SnippetForge';
 import { CURRICULUM } from './constants';
 import { Lesson, RailsComponentType, LessonCategory } from './types';
 import { Layers, Lightbulb, Activity, ArrowRight } from 'lucide-react';
@@ -20,6 +21,10 @@ const App: React.FC = () => {
   };
 
   const handleBlueprintAnalyze = (prompt: string) => {
+      setAiInputOverride(prompt);
+  };
+
+  const handleSnippetAnalyze = (prompt: string) => {
       setAiInputOverride(prompt);
   };
 
@@ -43,6 +48,9 @@ const App: React.FC = () => {
     }
     if (currentLesson.category === LessonCategory.CLI_ARCHITECT) {
         return <CLIArchitect />;
+    }
+    if (currentLesson.category === LessonCategory.SNIPPET_FORGE) {
+        return <SnippetForge onAnalyze={handleSnippetAnalyze} />;
     }
 
     // Default Text Content

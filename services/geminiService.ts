@@ -1,6 +1,6 @@
 import { GoogleGenAI, Content, Part, Type } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from '../constants';
-import { CLICommandResponse } from "../types";
+import { CLICommandResponse, SnippetResponse } from "../types";
 
 // We check for window.aistudio for the specific Veo/Image models.
 // We remove the conflicting global declaration to avoid TS errors about subsequent property declarations.
@@ -167,4 +167,54 @@ export const generateRailsCLICommand = async (naturalLanguageInput: string): Pro
         console.error("CLI Architect Error:", error);
         return null;
     }
+}
+
+export const generateRailsCodeSnippet = async (description: string): Promise<SnippetResponse | null> => {
+  const ai = getAIClient();
+
+  const schema = {
+    type: Type.OBJECT,
+    properties: {
+      title: { type: Type.STRING, description: "A concise title for the snippet (e.g., 'User Registration Service')" },
+      code: { type: Type.STRING, description: "The Ruby code. Must be valid, strict Ruby. Use Rails 7+ features." },
+      explanation: { type: Type.STRING, description: "Technical explanation of the logic." },
+      bestPractices: { 
+        type: Type.ARRAY, 
+        items: { type: Type.STRING },
+        description: "List of 3 key best practices followed in this snippet." 
+      },
+      suggestedPath: { type: Type.STRING, description: "Where this file should live (e.g., app/services/user_registration_service.rb)" }
+    },
+    required: ["title", "code", "explanation", "suggestedPath"]
+  };
+
+  const prompt = `Generate a production-ready Ruby on Rails 7+ code snippet based on this description: "${description}".
+  
+  Rules:
+  - Adhere to "Fat Model, Skinny Controller" or "Service Object" patterns.
+  - Use Modern Ruby syntax (Ruby 3.0+).
+  - Include comments in the code explaining complex lines.
+  - If a Service Object, use the \`call\` class method pattern or \`ApplicationService\` inheritance.
+  - Use Rails 7.1+ features where applicable (e.g., \`normalizes\`, \`generates_token_for\`).
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: schema
+      }
+    });
+
+    const text = response.text;
+    if (text) {
+      return JSON.parse(text) as SnippetResponse;
+    }
+    return null;
+  } catch (error) {
+    console.error("Snippet Forge Error:", error);
+    return null;
+  }
 }

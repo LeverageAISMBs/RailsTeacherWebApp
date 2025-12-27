@@ -13,7 +13,8 @@ export enum LessonCategory {
   ECOSYSTEM = 'Ecosystem',
   VERSION_DELTA = 'Version Delta',
   BLUEPRINTS = 'Blueprints',
-  CLI_ARCHITECT = 'CLI Architect'
+  CLI_ARCHITECT = 'CLI Architect',
+  SNIPPET_FORGE = 'Snippet Forge'
 }
 
 export interface Lesson {
@@ -86,4 +87,12 @@ export interface CLICommandResponse {
   command: string;
   explanation: string;
   flags: string[];
+}
+
+export interface SnippetResponse {
+  title: string;
+  code: string;
+  explanation: string;
+  bestPractices: string[];
+  suggestedPath: string;
 }
