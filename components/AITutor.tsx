@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Terminal, Cpu, Image as ImageIcon, MessageSquarePlus, Copy, Check, History, ChevronDown, Trash2 } from 'lucide-react';
+import { Send, Terminal, Cpu, Image as ImageIcon, MessageSquarePlus, Copy, Check, History, ChevronDown, Trash2, Zap, Brain } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { sendMessageToTutor, generateConceptSlide } from '../services/geminiService';
 
@@ -24,6 +24,11 @@ const DEFAULT_INIT_MSG: ChatMessage = {
     text: 'System Online. I am your Senior Rails Architect. Ask me about structure, patterns, or code generation.',
     timestamp: Date.now()
 };
+
+const MODELS = [
+    { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash', icon: Zap, description: 'Fast, efficient, low latency' },
+    { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro', icon: Brain, description: 'High reasoning, complex tasks' }
+];
 
 const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overrideInput }) => {
   // --- State Initialization ---
@@ -56,12 +61,15 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overri
   const [visualizing, setVisualizing] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [modelOpen, setModelOpen] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(MODELS[0].id);
   
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // --- Derived State ---
   const currentSession = sessions.find(s => s.id === currentSessionId) || sessions[0];
   const messages = currentSession.messages;
+  const activeModel = MODELS.find(m => m.id === selectedModel) || MODELS[0];
 
   // --- Effects ---
   
@@ -152,7 +160,7 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overri
     setInput('');
     setLoading(true);
 
-    const responseText = await sendMessageToTutor(userMsg.text, updatedMessages);
+    const responseText = await sendMessageToTutor(userMsg.text, updatedMessages, selectedModel);
 
     const modelMsg: ChatMessage = {
       id: (Date.now() + 1).toString(),
@@ -231,6 +239,40 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overri
         <div className="flex items-center gap-2">
              {visualizing && <span className="text-[10px] text-emerald-400 animate-pulse font-mono mr-2">RENDERING</span>}
              
+             {/* Model Selector */}
+             <div className="relative">
+                <button 
+                    onClick={() => setModelOpen(!modelOpen)}
+                    className={`flex items-center gap-1.5 text-xs px-2 py-1.5 rounded transition-colors ${modelOpen ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}
+                    title="Select Model"
+                >
+                    <activeModel.icon size={14} className={selectedModel.includes('pro') ? "text-purple-400" : "text-amber-400"} />
+                    <span className="font-medium hidden sm:inline">{activeModel.name}</span>
+                    <ChevronDown size={12} />
+                </button>
+                
+                {modelOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-lg shadow-xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2">
+                        {MODELS.map(model => (
+                            <button
+                                key={model.id}
+                                onClick={() => { setSelectedModel(model.id); setModelOpen(false); }}
+                                className={`w-full text-left px-3 py-2 flex items-center gap-2 hover:bg-slate-800 transition-colors ${selectedModel === model.id ? 'bg-slate-800/50' : ''}`}
+                            >
+                                <model.icon size={14} className={model.id.includes('pro') ? "text-purple-400" : "text-amber-400"} />
+                                <div>
+                                    <div className={`text-xs font-bold ${selectedModel === model.id ? 'text-white' : 'text-slate-300'}`}>{model.name}</div>
+                                    <div className="text-[10px] text-slate-500">{model.description}</div>
+                                </div>
+                                {selectedModel === model.id && <Check size={12} className="ml-auto text-emerald-400" />}
+                            </button>
+                        ))}
+                    </div>
+                )}
+             </div>
+
+             <div className="w-px h-4 bg-slate-700 mx-1"></div>
+
              {/* History Dropdown Trigger */}
              <div className="relative">
                  <button 

@@ -34,14 +34,15 @@ const ensurePaidKeySelection = async () => {
 
 export const sendMessageToTutor = async (
   message: string, 
-  history: { role: 'user' | 'model'; text: string }[]
+  history: { role: 'user' | 'model'; text: string }[],
+  modelId: string = 'gemini-3-flash-preview'
 ): Promise<string> => {
   try {
     const ai = getAIClient();
-    const recentHistory = history.slice(-10); 
+    // const recentHistory = history.slice(-10); // Not currently used in the API call but useful for context management if needed later
     
     const chat = ai.chats.create({
-      model: 'gemini-3-flash-preview',
+      model: modelId,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
         temperature: 0.2, 
