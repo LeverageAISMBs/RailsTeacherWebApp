@@ -6,9 +6,10 @@ import { sendMessageToTutor, generateConceptSlide } from '../services/geminiServ
 interface AITutorProps {
   initialPrompt?: string;
   currentContext?: string; // To give context to the visualizer
+  overrideInput?: string; // To allow parent to set input
 }
 
-const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext }) => {
+const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overrideInput }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'init',
@@ -25,6 +26,10 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext }) => {
   useEffect(() => {
     if (initialPrompt) setInput(initialPrompt);
   }, [initialPrompt]);
+
+  useEffect(() => {
+    if (overrideInput) setInput(overrideInput);
+  }, [overrideInput]);
 
   useEffect(() => {
     if (scrollRef.current) {

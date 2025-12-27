@@ -48,6 +48,14 @@ export const BLUEPRINTS: BlueprintProject[] = [
     tags: ['eCommerce', 'Spree', 'Modular'],
     githubUrl: 'https://github.com/solidusio/solidus',
     architecturalHighlight: 'Learn how to build a modular engine-based architecture.'
+  },
+  {
+    id: 'bp5',
+    name: 'Forem',
+    description: 'The open source platform that powers Dev.to.',
+    tags: ['CMS', 'Social', 'Caching'],
+    githubUrl: 'https://github.com/forem/forem',
+    architecturalHighlight: 'Extensive use of Edge Caching (Fastly) and Liquid tags for dynamic content rendering.'
   }
 ];
 

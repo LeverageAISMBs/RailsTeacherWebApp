@@ -11,10 +11,16 @@ import { Layers, Lightbulb, Activity, ArrowRight } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentLesson, setCurrentLesson] = useState<Lesson>(CURRICULUM[0].lessons[0]);
+  const [aiInputOverride, setAiInputOverride] = useState('');
 
   const handleSelectLesson = (id: string) => {
     const lesson = CURRICULUM.flatMap(m => m.lessons).find(l => l.id === id);
     if (lesson) setCurrentLesson(lesson);
+    setAiInputOverride(''); // Clear override on lesson change
+  };
+
+  const handleBlueprintAnalyze = (prompt: string) => {
+      setAiInputOverride(prompt);
   };
 
   // Determine active visualizer stage based on lesson content (simple heuristic)
@@ -33,7 +39,7 @@ const App: React.FC = () => {
         return <VersionDelta />;
     }
     if (currentLesson.category === LessonCategory.BLUEPRINTS) {
-        return <BlueprintLibrary />;
+        return <BlueprintLibrary onAnalyze={handleBlueprintAnalyze} />;
     }
     if (currentLesson.category === LessonCategory.CLI_ARCHITECT) {
         return <CLIArchitect />;
@@ -120,6 +126,7 @@ const App: React.FC = () => {
                 <AITutor 
                     initialPrompt={currentLesson.aiPromptTemplate} 
                     currentContext={currentLesson.title + ": " + currentLesson.architecturalNote}
+                    overrideInput={aiInputOverride}
                 />
             </div>
         </div>
