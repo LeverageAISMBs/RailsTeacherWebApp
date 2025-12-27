@@ -1,5 +1,6 @@
-import { GoogleGenAI, Content, Part } from "@google/genai";
+import { GoogleGenAI, Content, Part, Type } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from '../constants';
+import { CLICommandResponse } from "../types";
 
 // We check for window.aistudio for the specific Veo/Image models.
 // We remove the conflicting global declaration to avoid TS errors about subsequent property declarations.
@@ -110,6 +111,60 @@ export const generateConceptSlide = async (concept: string): Promise<string | nu
         return null;
     } catch (error) {
         console.error("NanoBanana Visualization Error:", error);
+        return null;
+    }
+}
+
+export const generateRailsCLICommand = async (naturalLanguageInput: string): Promise<CLICommandResponse | null> => {
+    const ai = getAIClient();
+    
+    const schema = {
+        type: Type.OBJECT,
+        properties: {
+          command: {
+            type: Type.STRING,
+            description: "The exact 'rails generate' command to execute.",
+          },
+          explanation: {
+            type: Type.STRING,
+            description: "Brief explanation of why these flags or types were chosen.",
+          },
+          flags: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "List of flags used (e.g., --skip-test, --no-timestamps).",
+          },
+        },
+        required: ["command", "explanation"],
+    };
+
+    const prompt = `Translate the following natural language request into a precise Rails 7/8 CLI command. 
+    Request: "${naturalLanguageInput}"
+    
+    Rules:
+    - Prefer 'rails generate' or 'rails g'.
+    - Use correct field types (e.g., 'rich_text' instead of text if implied).
+    - If user asks for auth, suggest 'rails g authentication' (Rails 8) or relevant scaffold.
+    - Be precise with syntax (e.g., 'user:references' for associations).
+    `;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: schema
+            }
+        });
+
+        const text = response.text;
+        if (text) {
+            return JSON.parse(text) as CLICommandResponse;
+        }
+        return null;
+    } catch (error) {
+        console.error("CLI Architect Error:", error);
         return null;
     }
 }

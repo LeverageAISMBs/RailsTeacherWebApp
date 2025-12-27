@@ -253,5 +253,22 @@ Rails 7.1+ ships with a default Dockerfile. Use it.
         architecturalNote: "Your dev environment should mirror production. Use Docker Compose locally to spin up Postgres and Redis so you aren't surprised by env differences."
       }
     ]
+  },
+  {
+    id: 'm6',
+    title: 'Command Center',
+    description: 'Interactive tools to accelerate development.',
+    lessons: [
+      {
+        id: 'l6-1',
+        title: 'The CLI Architect',
+        category: LessonCategory.CLI_ARCHITECT,
+        difficulty: Difficulty.INTERMEDIATE,
+        description: 'Convert natural language into precise Rails terminal commands.',
+        content: 'Loading CLI Architect Interface...',
+        aiPromptTemplate: 'N/A',
+        architecturalNote: 'Memorizing syntax is a waste of mental RAM. Use tools to generate the syntax so you can focus on the data model.'
+      }
+    ]
   }
 ];

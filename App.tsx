@@ -4,6 +4,7 @@ import AITutor from './components/AITutor';
 import Visualizer from './components/Visualizer';
 import VersionDelta from './components/VersionDelta';
 import BlueprintLibrary from './components/BlueprintLibrary';
+import CLIArchitect from './components/CLIArchitect';
 import { CURRICULUM } from './constants';
 import { Lesson, RailsComponentType, LessonCategory } from './types';
 import { Layers, Lightbulb, Activity, ArrowRight } from 'lucide-react';
@@ -33,6 +34,9 @@ const App: React.FC = () => {
     }
     if (currentLesson.category === LessonCategory.BLUEPRINTS) {
         return <BlueprintLibrary />;
+    }
+    if (currentLesson.category === LessonCategory.CLI_ARCHITECT) {
+        return <CLIArchitect />;
     }
 
     // Default Text Content

@@ -12,7 +12,8 @@ export enum LessonCategory {
   AI_WORKFLOW = 'AI Workflow',
   ECOSYSTEM = 'Ecosystem',
   VERSION_DELTA = 'Version Delta',
-  BLUEPRINTS = 'Blueprints'
+  BLUEPRINTS = 'Blueprints',
+  CLI_ARCHITECT = 'CLI Architect'
 }
 
 export interface Lesson {
@@ -79,4 +80,10 @@ export interface DeltaComparison {
     description: string;
   };
   architecturalVerdict: string;
+}
+
+export interface CLICommandResponse {
+  command: string;
+  explanation: string;
+  flags: string[];
 }
