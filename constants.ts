@@ -259,6 +259,16 @@ Rails 7.1+ ships with a default Dockerfile. Use it.
         `,
         aiPromptTemplate: "Analyze a standard Rails 7 Dockerfile and explain how to optimize layer caching for bundle install.",
         architecturalNote: "Your dev environment should mirror production. Use Docker Compose locally to spin up Postgres and Redis so you aren't surprised by env differences."
+      },
+      {
+        id: 'l5-2',
+        title: 'Kamal Simulator (Deploy Flow)',
+        category: LessonCategory.DEPLOYMENT_SIMULATOR,
+        difficulty: Difficulty.ARCHITECT,
+        description: 'Interactive simulation of the Kamal zero-downtime deployment process.',
+        content: 'Loading Deployment Simulator...',
+        aiPromptTemplate: 'Explain how Traefik handles the switch between old and new containers during a Kamal deploy.',
+        architecturalNote: 'Kamal (formerly MRSK) is the architectural lever that gives you PaaS convenience on bare metal VPS. Mastering it reduces your cloud bill by 80%.'
       }
     ]
   },

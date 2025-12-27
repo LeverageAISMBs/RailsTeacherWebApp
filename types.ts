@@ -1,3 +1,4 @@
+
 export enum Difficulty {
   BEGINNER = 'Beginner',
   INTERMEDIATE = 'Intermediate',
@@ -14,7 +15,8 @@ export enum LessonCategory {
   VERSION_DELTA = 'Version Delta',
   BLUEPRINTS = 'Blueprints',
   CLI_ARCHITECT = 'CLI Architect',
-  SNIPPET_FORGE = 'Snippet Forge'
+  SNIPPET_FORGE = 'Snippet Forge',
+  DEPLOYMENT_SIMULATOR = 'Deployment Simulator'
 }
 
 export interface Lesson {

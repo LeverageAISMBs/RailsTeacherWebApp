@@ -6,6 +6,7 @@ import VersionDelta from './components/VersionDelta';
 import BlueprintLibrary from './components/BlueprintLibrary';
 import CLIArchitect from './components/CLIArchitect';
 import SnippetForge from './components/SnippetForge';
+import DeploymentSimulator from './components/DeploymentSimulator';
 import { CURRICULUM } from './constants';
 import { Lesson, RailsComponentType, LessonCategory } from './types';
 import { Layers, Lightbulb, Activity, ArrowRight } from 'lucide-react';
@@ -51,6 +52,9 @@ const App: React.FC = () => {
     }
     if (currentLesson.category === LessonCategory.SNIPPET_FORGE) {
         return <SnippetForge onAnalyze={handleSnippetAnalyze} />;
+    }
+    if (currentLesson.category === LessonCategory.DEPLOYMENT_SIMULATOR) {
+        return <DeploymentSimulator />;
     }
 
     // Default Text Content
