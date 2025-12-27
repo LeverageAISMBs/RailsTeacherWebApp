@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Terminal, Cpu, Image as ImageIcon } from 'lucide-react';
+import { Send, Terminal, Cpu, Image as ImageIcon, MessageSquarePlus, Copy, Check } from 'lucide-react';
 import { ChatMessage } from '../types';
 import { sendMessageToTutor, generateConceptSlide } from '../services/geminiService';
 
@@ -9,18 +9,31 @@ interface AITutorProps {
   overrideInput?: string; // To allow parent to set input
 }
 
+const LOCAL_STORAGE_KEY = 'railsgen7_chat_history';
+
 const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overrideInput }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
+  // Load initial state from local storage or default
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) {
+        try {
+            return JSON.parse(saved);
+        } catch (e) {
+            console.error("Failed to parse chat history", e);
+        }
+    }
+    return [{
       id: 'init',
       role: 'model',
       text: 'System Online. I am your Senior Rails Architect. Ask me about structure, patterns, or code generation.',
       timestamp: Date.now()
-    }
-  ]);
+    }];
+  });
+
   const [input, setInput] = useState(initialPrompt || '');
   const [loading, setLoading] = useState(false);
   const [visualizing, setVisualizing] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,11 +44,33 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overri
     if (overrideInput) setInput(overrideInput);
   }, [overrideInput]);
 
+  // Persist messages to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleNewChat = () => {
+    const initMsg: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'model',
+        text: 'System Online. I am your Senior Rails Architect. Ask me about structure, patterns, or code generation.',
+        timestamp: Date.now()
+    };
+    setMessages([initMsg]);
+    // localStorage updates via useEffect
+  };
+
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const handleSend = async () => {
     if (!input.trim() || loading) return;
@@ -114,9 +149,16 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overri
             <Cpu className="text-rails-red w-5 h-5" />
             <h2 className="font-mono font-bold text-slate-100">AI Architect Console</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
              {visualizing && <span className="text-[10px] text-emerald-400 animate-pulse font-mono">RENDERING</span>}
              <div className="text-xs text-slate-500 font-mono">Gemini-3-Flash</div>
+             <button 
+                onClick={handleNewChat}
+                className="text-slate-400 hover:text-white transition-colors"
+                title="New Chat"
+             >
+                <MessageSquarePlus size={16} />
+             </button>
         </div>
       </div>
 
@@ -131,10 +173,33 @@ const AITutor: React.FC<AITutorProps> = ({ initialPrompt, currentContext, overri
               className={`max-w-[85%] rounded-lg p-3 text-sm font-mono whitespace-pre-wrap ${
                 msg.role === 'user'
                   ? 'bg-blue-900/30 text-blue-100 border border-blue-800'
-                  : 'bg-slate-800 text-slate-300 border border-slate-700'
+                  : 'bg-slate-800 text-slate-300 border border-slate-700 group'
               }`}
             >
               {msg.text}
+              
+              {/* Copy Button for Model Responses */}
+              {msg.role === 'model' && (
+                  <div className="mt-3 pt-2 border-t border-slate-700/50 flex justify-end">
+                      <button 
+                        onClick={() => handleCopy(msg.text, msg.id)}
+                        className="flex items-center gap-1 text-[10px] text-slate-500 hover:text-emerald-400 transition-colors uppercase tracking-wider font-bold"
+                        title="Copy to clipboard"
+                      >
+                        {copiedId === msg.id ? (
+                            <>
+                                <Check size={12} />
+                                <span>Copied</span>
+                            </>
+                        ) : (
+                            <>
+                                <Copy size={12} />
+                                <span>Copy</span>
+                            </>
+                        )}
+                      </button>
+                  </div>
+              )}
             </div>
             
             {msg.image && (
